@@ -2220,6 +2220,65 @@ func TestValidateMissingValidationDeclarationStruct(t *testing.T) {
 	SetFieldsRequiredByDefault(false)
 }
 
+type XxxFieldsToIgnoreStruct struct {
+	Name  string `valid:"-"`
+	Email string `valid:"required,email"`
+
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+
+	XXx_NoUnkeyedLiteral struct{} `json:"-"`
+	XXx_unrecognized     []byte   `json:"-"`
+	XXx_sizecache        int32    `json:"-"`
+
+	XxX_NoUnkeyedLiteral struct{} `json:"-"`
+	XxX_unrecognized     []byte   `json:"-"`
+	XxX_sizecache        int32    `json:"-"`
+
+	Xxx_NoUnkeyedLiteral struct{} `json:"-"`
+	Xxx_unrecognized     []byte   `json:"-"`
+	Xxx_sizecache        int32    `json:"-"`
+
+	xXX_NoUnkeyedLiteral struct{} `json:"-"`
+	xXX_unrecognized     []byte   `json:"-"`
+	xXX_sizecache        int32    `json:"-"`
+
+	xXx_NoUnkeyedLiteral struct{} `json:"-"`
+	xXx_unrecognized     []byte   `json:"-"`
+	xXx_sizecache        int32    `json:"-"`
+
+	xxX_NoUnkeyedLiteral struct{} `json:"-"`
+	xxX_unrecognized     []byte   `json:"-"`
+	xxX_sizecache        int32    `json:"-"`
+
+	xxx_NoUnkeyedLiteral struct{} `json:"-"`
+	xxx_unrecognized     []byte   `json:"-"`
+	xxx_sizecache        int32    `json:"-"`
+}
+
+func TestValidateXxxFieldsToIgnoreStruct(t *testing.T) {
+	var tests = []struct {
+		param    XxxFieldsToIgnoreStruct
+		expected bool
+	}{
+		{XxxFieldsToIgnoreStruct{Name: "hey", Email: "test@example.com"}, true},
+	}
+	SetFieldsRequiredByDefault(true)
+	SetIgnoreXxxFields(true)
+	for _, test := range tests {
+		actual, err := ValidateStruct(test.param)
+		if actual != test.expected {
+			t.Errorf("Expected ValidateStruct(%q) to be %v, got %v", test.param, test.expected, actual)
+			if err != nil {
+				t.Errorf("Got Error on ValidateStruct(%q): %s", test.param, err)
+			}
+		}
+	}
+	SetIgnoreXxxFields(false)
+	SetFieldsRequiredByDefault(false)
+}
+
 func TestFieldRequiredByDefault(t *testing.T) {
 	var tests = []struct {
 		param    FieldRequiredByDefault

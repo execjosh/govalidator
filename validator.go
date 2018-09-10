@@ -24,6 +24,7 @@ import (
 
 var (
 	fieldsRequiredByDefault bool
+	ignoreXxxFields         bool
 	notNumberRegexp         = regexp.MustCompile("[^0-9]+")
 	whiteSpacesAndMinus     = regexp.MustCompile("[\\s-]+")
 	paramsRegexp            = regexp.MustCompile("\\(.*\\)$")
@@ -49,6 +50,18 @@ const RF3339WithoutZone = "2006-01-02T15:04:05"
 //         Email string `valid:"email,optional"`
 func SetFieldsRequiredByDefault(value bool) {
 	fieldsRequiredByDefault = value
+}
+
+// SetIgnoreXxxFields causes validation to ignore fields that start with XXX (or any permutation of lower/upper thereof).
+// This struct will pass govalidator.ValidateStruct() even if the XXX fields have no tags:
+//     type SomeRequest struct {
+//         Name         string   `protobuf:"bytes,1,opt,name=name,json=name,proto3" json:"name,omitempty" valid:"required"`
+//         XXX_NoUnkeyedLiteral struct{} `json:"-"`
+//         XXX_unrecognized     []byte   `json:"-"`
+//         XXX_sizecache        int32    `json:"-"`
+//     }
+func SetIgnoreXxxFields(value bool) {
+	ignoreXxxFields = value
 }
 
 // IsEmail check if the string is an email.
@@ -941,6 +954,10 @@ func checkRequired(v reflect.Value, t reflect.StructField, options tagOptionsMap
 func typeCheck(v reflect.Value, t reflect.StructField, o reflect.Value, options tagOptionsMap) (isValid bool, resultErr error) {
 	if !v.IsValid() {
 		return false, nil
+	}
+
+	if ignoreXxxFields && strings.HasPrefix(strings.ToLower(t.Name), "xxx") {
+		return true, nil
 	}
 
 	tag := t.Tag.Get(tagName)

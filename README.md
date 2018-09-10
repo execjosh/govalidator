@@ -62,6 +62,31 @@ type exampleStruct2 struct {
 }
 ```
 
+#### Activate behavior to ignore fields that start with XXX
+`SetIgnoreXxxFields` causes validation to ignore fields that start with XXX (or any permutation of lower/upper thereof).
+
+```go
+import "github.com/asaskevich/govalidator"
+
+func init() {
+  govalidator.SetIgnoreXxxFields(true)
+}
+```
+
+Here's some code to explain it:
+
+```go
+// The fields starting with `XXX_` do not have validation tags and will fail
+// with `govalidator.ValidateStruct()` when `SetFieldsRequiredByDefault` has
+// been set to `true`.
+type SomeRequest struct {
+  Name                 string   `protobuf:"bytes,1,opt,name=name,json=name,proto3" json:"name,omitempty" valid:"required"`
+  XXX_NoUnkeyedLiteral struct{} `json:"-"`
+  XXX_unrecognized     []byte   `json:"-"`
+  XXX_sizecache        int32    `json:"-"`
+}
+```
+
 #### Recent breaking changes (see [#123](https://github.com/asaskevich/govalidator/pull/123))
 ##### Custom validator function signature
 A context was added as the second parameter, for structs this is the object being validated – this makes dependent validation possible.
